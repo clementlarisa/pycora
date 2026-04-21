@@ -17,7 +17,7 @@ from pycora.zonotope import Zonotope
 # Helpers
 # ---------------------------------------------------------------------------
 def _bmw_params():
-    """BMW 320i wheelbase from the Althoff 2012 paper (lf + lr = 2.578 m)."""
+    """BMW 320i wheelbase (lf + lr = 2.578 m)."""
     return KSParams(a=1.1562, b=1.4227)
 
 
@@ -39,7 +39,7 @@ def _scipy_simulate(f_jax, x0, u_const, dt, n_steps):
 # Straight-line driving
 # ---------------------------------------------------------------------------
 def test_ks_straight_line():
-    """δ = 0, v = 10, no input → ψ stays 0, x grows linearly, y stays 0."""
+    """delta = 0, v = 10, no input => psi stays 0, x grows linearly, y stays 0."""
     params = _bmw_params()
     f = make_ks_dynamics(params)
     sys = NonlinearSys(f, n_x=5, n_u=2)
@@ -52,19 +52,19 @@ def test_ks_straight_line():
     res = sys.reach(R0=R0, U=U, u_ref=np.array([0.0, 0.0]),
                     dt=0.1, n_steps=20)
 
-    # Final reach set should bracket x = 20, y ≈ 0, ψ ≈ 0
+    # Final reach set should bracket x = 20, y ~ 0, psi ~ 0
     R_final = res.R_tp[-1]
     lb, ub = R_final.interval()
     assert 19.5 < lb[0] < 20.5, f"x lb {lb[0]} not near 20"
     assert 19.5 < ub[0] < 20.5, f"x ub {ub[0]} not near 20"
     assert -0.1 < lb[1] < 0.1
     assert -0.1 < ub[1] < 0.1
-    assert -0.05 < lb[4] < 0.05  # ψ
+    assert -0.05 < lb[4] < 0.05  # psi
     assert -0.05 < ub[4] < 0.05
 
 
 def test_ks_constant_acceleration():
-    """v(0)=0, a=2 const, δ=0 → ψ stays 0, v(t) = 2t."""
+    """v(0)=0, a=2 const, delta=0 => psi stays 0, v(t) = 2t."""
     params = _bmw_params()
     f = make_ks_dynamics(params)
     sys = NonlinearSys(f, n_x=5, n_u=2)
@@ -76,7 +76,7 @@ def test_ks_constant_acceleration():
     res = sys.reach(R0=R0, U=U, u_ref=np.array([0.0, 2.0]),
                     dt=0.1, n_steps=10)
 
-    # After 10 steps (1s) at a=2, v should be ≈ 2.0, x ≈ 1.0
+    # After 10 steps (1s) at a=2, v should be ~ 2.0, x ~ 1.0
     R_final = res.R_tp[-1]
     lb, ub = R_final.interval()
     v_lb, v_ub = lb[3], ub[3]
@@ -85,7 +85,7 @@ def test_ks_constant_acceleration():
 
 
 def test_ks_curve_orientation_grows():
-    """δ = 0.1 const, v = 8 → ψ̇ = v·cos(β)·tan(δ)/L > 0, so ψ grows."""
+    """delta = 0.1 const, v = 8 => psi_dot = v*cos(beta)*tan(delta)/L > 0, so psi grows."""
     params = _bmw_params()
     f = make_ks_dynamics(params)
     sys = NonlinearSys(f, n_x=5, n_u=2)
@@ -109,7 +109,7 @@ def test_ks_curve_orientation_grows():
         f"reach set misses reference final state {final_ref}\n" \
         f"reach bounds: {R_final.interval()}"
 
-    # ψ should have grown to roughly v · tan(δ) / L · t (approximate)
+    # psi should have grown to roughly v * tan(delta) / L * t (approximate)
     psi_expected = v0 * np.tan(delta0) / params.wheelbase * 1.0
     assert 0.8 * psi_expected < final_ref[4] < 1.2 * psi_expected
 
@@ -137,7 +137,7 @@ def test_ks_reach_contains_all_intermediate_states():
 
 
 def test_ks_uncertain_initial_velocity_widens_position():
-    """Initial velocity uncertain in [9, 11] → final x at t=1.0s in [9, 11]."""
+    """Initial velocity uncertain in [9, 11] => final x at t=1.0s in [9, 11]."""
     params = _bmw_params()
     f = make_ks_dynamics(params)
     sys = NonlinearSys(f, n_x=5, n_u=2)
@@ -152,6 +152,6 @@ def test_ks_uncertain_initial_velocity_widens_position():
 
     R_final = res.R_tp[-1]
     lb, ub = R_final.interval()
-    # x at t=1s: low bound ≤ 9 (v_min · 1s), high bound ≥ 11 (v_max · 1s)
+    # x at t=1s: low bound <= 9 (v_min * 1s), high bound >= 11 (v_max * 1s)
     assert lb[0] <= 9.0 + 0.5, f"x lb {lb[0]} not below 9.5"
     assert ub[0] >= 11.0 - 0.5, f"x ub {ub[0]} not above 10.5"

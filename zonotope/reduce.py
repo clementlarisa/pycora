@@ -1,4 +1,4 @@
-"""Girard zonotope reduction — port of CORA's priv_reduceGirard.m.
+"""Girard zonotope reduction see CORA's priv_reduceGirard.m.
 
 Reduces the number of generators while keeping the zonotope an
 over-approximation of the original.
@@ -19,7 +19,7 @@ from .zonotope import Zonotope
 def reduce_girard(Z: Zonotope, order: float = 50.0) -> Zonotope:
     """Reduce zonotope so its order does not exceed ``order``.
 
-    Order = num_generators / dim. Default 50 matches CORA's default.
+    Order = num_generators / dim. Default 50 to match CORA's default.
 
     Parameters
     ----------

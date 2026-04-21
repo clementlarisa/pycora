@@ -1,14 +1,10 @@
 """Taylor-series helpers for the matrix exponential and CORA correction matrices.
 
-Faithful port of:
-  CORA/contDynamics/@linearSys/private/{priv_expmRemainder,
-                                         priv_correctionMatrixState,
-                                         priv_correctionMatrixInput}.m
+See  CORA/contDynamics/@linearSys/private/{priv_expmRemainder,
+                                           priv_correctionMatrixState,
+                                           priv_correctionMatrixInput}.m
 
-Reference:
-  M. Althoff, "Reachability analysis and its application to the safety
-  assessment of autonomous cars", PhD dissertation, TU München, 2010.
-  Chapter 3, Eqs. (3.6), (3.7), Prop. 3.1.
+PhD thesis: Chapter 3, Eqs. (3.6), (3.7), Prop. 3.1.
 """
 from __future__ import annotations
 
@@ -19,9 +15,9 @@ from scipy.linalg import expm
 
 
 def eAdt_taylor(A: np.ndarray, dt: float, truncation_order: int = 6) -> np.ndarray:
-    """Truncated Taylor series for exp(A·dt).
+    """Truncated Taylor series for exp(A*dt).
 
-    Returns the sum sum_{i=0}^{order} (A·dt)^i / i!  (no remainder term).
+    Returns the sum sum_{i=0}^{order} (A*dt)^i / i!  (no remainder term).
     """
     n = A.shape[0]
     M = np.eye(n)
@@ -36,10 +32,10 @@ def expm_remainder(A: np.ndarray, dt: float, truncation_order: int = 6) -> np.nd
     """Remainder of the truncated matrix exponential (CORA priv_expmRemainder.m).
 
     Returns the half-width W of the interval matrix [-W, W] s.t.
-        exp(A·dt) ∈ truncated_taylor(A, dt) + [-W, W]   element-wise.
+        exp(A*dt) ∈ truncated_taylor(A, dt) + [-W, W]   element-wise.
 
     Computed via the conservative bound from Althoff (2010), eq. (3.7):
-        W = | exp(|A|·dt) - sum_{i=0}^{order} (|A|·dt)^i / i! |
+        W = | exp(|A|*dt) - sum_{i=0}^{order} (|A|*dt)^i / i! |
     """
     A_abs = np.abs(A)
     M = eAdt_taylor(A_abs, dt, truncation_order)
@@ -128,13 +124,13 @@ def correction_matrix_input(
 def particular_solution_constant(
     A: np.ndarray, dt: float, truncation_order: int = 6
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Compute the linear map M such that M·u = ∫₀^dt exp(A·τ)·u dτ.
+    """Compute the linear map M such that M*u = \int_{0}^dt exp(A*tau)*u dtau.
 
     Returns (M_center, W_radius) — center matrix and bounding radii from
     the Taylor truncation remainder. The actual particular solution for input
-    u (which may be a zonotope) is M·u with elementwise uncertainty ±W·dt·|u|.
+    u (which may be a zonotope) is M*u with elementwise uncertainty +/-W*dt*|u|.
 
-    If A is invertible: M = A^{-1}·(exp(A·dt) - I) (closed form, exact —
+    If A is invertible: M = A^{-1}*(exp(A*dt) - I) (closed form, exact
     in this case the remainder reduces to the matrix exp remainder).
     Else: truncated power series.
     """
@@ -149,7 +145,7 @@ def particular_solution_constant(
     except np.linalg.LinAlgError:
         pass
 
-    # Singular A: use power series sum_{j=0}^{order} A^j · dt^{j+1} / (j+1)!
+    # Singular A: use power series sum_{j=0}^{order} A^j * dt^{j+1} / (j+1)!
     M = dt * np.eye(n)
     Apower = np.eye(n)
     for j in range(1, truncation_order + 1):

@@ -1,4 +1,4 @@
-"""NonlinearSys reachability — port of CORA @nonlinearSys."""
+"""NonlinearSys reachability port of CORA @nonlinearSys."""
 from .linearize import lagrange_remainder, linearize_at
 from .nonlinear_sys import NonlinearSys, ReachResult
 

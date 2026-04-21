@@ -4,10 +4,9 @@
 %
 % Setup (one-time):
 %   Install CORA via MATLAB Add-Ons:
-%     Home tab → Add-Ons → search "CORA" → Install
-%   (Auto-adds to MATLAB path; no manual addpath needed.)
+%     Home tab > Add-Ons > search "CORA" > Install
 %
-% Then run this script:
+% Then run
 %     run('cora_ks_reach.m')
 %
 % This script does NOT use steeringConstraints / accelerationConstraints
@@ -15,18 +14,16 @@
 
 clear; clc;
 
-% --------- Output directory (must be writable from both Windows and WSL) -----
+% --------- Output directory -----
 % Adjust this if needed. Using the project's validation/ folder:
 output_dir = 'C:\Users\larisa\Projects\commonroad-frenetix-project\validation\cora_outputs';
-% Equivalent WSL path: /home/larisa/Projects/commonroad-frenetix-project/validation/cora_outputs
-% Alternative if WSL path doesn't resolve in MATLAB:
-% output_dir = 'C:\temp\pycora_validation';
+% WSL path: /home/larisa/Projects/commonroad-frenetix-project/validation/cora_outputs
 
 if ~exist(output_dir, 'dir')
     mkdir(output_dir);
 end
 
-% --------- KS bicycle vehicle parameters (BMW 320i, matches pycora test) ----
+% --------- KS bicycle vehicle parameters (BMW 320i) ----
 a_param = 1.1562;   % distance c.o.g. to front axle [m]
 b_param = 1.4227;   % distance c.o.g. to rear axle [m]
 l_wb = a_param + b_param;
@@ -47,7 +44,7 @@ KS_f = @(x,u) [
 % Wrap as nonlinearSys (5 states, 2 inputs)
 sys = nonlinearSys('KS', KS_f, 5, 2);
 
-% --------- Reach configuration (matches pycora test_ks_curve_orientation_grows)
+% --------- Reach configuration (pycora test_ks_curve_orientation_grows)
 delta0 = 0.1;
 v0 = 8.0;
 x0 = [0.0; 0.0; delta0; v0; 0.0];
@@ -55,7 +52,7 @@ init_radii = [0.01; 0.01; 1e-4; 0.01; 1e-4];
 
 R0 = zonotope(x0, diag(init_radii));
 
-% Input set centered on (0, 0); essentially no input over the horizon
+% Input set centered on (0, 0) essentially no input over the horizon
 u_center = [0.0; 0.0];
 u_radii = [1e-6; 1e-6];
 U_uncertain = zonotope(zeros(2,1), diag(u_radii));

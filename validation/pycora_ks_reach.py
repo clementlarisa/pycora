@@ -1,6 +1,6 @@
-"""Run pycora reach with the SAME setup as cora_ks_reach.m and save bounds CSV.
+"""Run pycora reach with the setup cora_ks_reach.m and save bounds CSV.
 
-Then `compare_cora_pycora.py` can diff the two CSVs.
+Then `compare_cora_pycora.py`
 """
 from __future__ import annotations
 
@@ -11,7 +11,6 @@ import numpy as np
 from pycora import KSParams, NonlinearSys, Zonotope, make_ks_dynamics
 
 
-# ── Match cora_ks_reach.m exactly ────────────────────────────────────────────
 # Vehicle params (BMW 320i)
 PARAMS = KSParams(a=1.1562, b=1.4227)
 
@@ -52,7 +51,6 @@ def main():
     )
     print(f"Got {len(res.R_tp)} time-point sets.")
 
-    # Save bounds CSV in same format as MATLAB script
     csv_path = os.path.join(OUT_DIR, "ks_curve_reach_bounds.csv")
     header = "t,lb_x,ub_x,lb_y,ub_y,lb_delta,ub_delta,lb_v,ub_v,lb_psi,ub_psi"
 

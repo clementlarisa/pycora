@@ -1,15 +1,9 @@
-"""Zonotope class — Python port of CORA's @zonotope.
-
+"""
 A zonotope is the set { c + sum_i(beta_i * g_i) | beta_i in [-1, 1] }
 where c in R^n is the center and g_i in R^n are the generators.
 
-Faithful port of:
-  CORA/contSet/@zonotope/{zonotope, plus, mtimes, convHull_, enclose,
+Check CORA/contSet/@zonotope/{zonotope, plus, mtimes, convHull_, enclose,
                           cartProd_, interval, project}.m
-
-Reference:
-  M. Althoff, "Reachability analysis and its application to the safety
-  assessment of autonomous cars", PhD dissertation, TU München, 2010.
 """
 from __future__ import annotations
 
@@ -103,7 +97,7 @@ class Zonotope:
         )
 
     # -------------------------------------------------------------------------
-    # Operations (port of CORA @zonotope methods)
+    # Operations
     # -------------------------------------------------------------------------
     def plus(self, other) -> "Zonotope":
         """Minkowski sum (CORA plus.m).

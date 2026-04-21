@@ -1,22 +1,20 @@
-"""Kinematic single-track (KS) bicycle model — port of CORA's
-vehicleDynamics_KS_cog.m.
+"""Kinematic single-track (KS) bicycle model port of CORA's vehicleDynamics_KS_cog.m.
 
 State (5D):
     x[0] = s_x        x-position in global frame
     x[1] = s_y        y-position in global frame
-    x[2] = δ          steering angle of front wheels
+    x[2] = delta          steering angle of front wheels
     x[3] = v          velocity at center of gravity
-    x[4] = Ψ          yaw angle (vehicle heading)
+    x[4] = psi          yaw angle (vehicle heading)
 
 Input (2D):
-    u[0] = δ̇         steering rate
+    u[0] = delta_dot         steering rate
     u[1] = a          longitudinal acceleration
 
-Reference point: center of gravity. Slip angle β is computed from steering
+Reference point: center of gravity. Slip angle beta is computed from steering
 angle and the rear-axle distance (kinematic, no tire forces).
 
-For JAX compatibility, this version omits the steering/acceleration
-constraint clipping that CORA does — caller should pass U bounded
+JAX => this version omits the steering/acceleration constraint clipping so caller should pass U bounded
 appropriately.
 """
 from __future__ import annotations
@@ -30,8 +28,8 @@ import numpy as np
 @dataclass(frozen=True)
 class KSParams:
     """Vehicle parameters for the kinematic single-track model."""
-    a: float          # distance from c.o.g. to front axle [m]
-    b: float          # distance from c.o.g. to rear axle [m]
+    a: float          # distance from CoG to front axle [m]
+    b: float          # distance from CoG to rear axle [m]
 
     @property
     def wheelbase(self) -> float:
@@ -55,7 +53,7 @@ def make_ks_dynamics(params: KSParams):
         delta_dot = u[0]
         a_long = u[1]
 
-        # slip angle (kinematic): β = atan(tan(δ) · b/L) · sign(v)
+        # slip angle (kinematic): beta = atan(tan(delta) * b/L) * sign(v)
         # We use a smooth sign approximation for differentiability:
         sign_v = jnp.tanh(100.0 * v)
         beta = jnp.arctan(jnp.tan(delta) * b / l_wb) * sign_v

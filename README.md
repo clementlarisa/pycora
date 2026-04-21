@@ -1,12 +1,8 @@
 # pycora
 
-Minimal Python port of [CORA](https://tumcps.github.io/CORA/) (Continuous
+Python port of [CORA](https://tumcps.github.io/CORA/) (Continuous
 Reachability Analyzer) focused on autonomous-vehicle reachability with
-bicycle kinematics.
-
-Goal: provide reachability with **orientation tracking** (which the
-production [`commonroad-reach`](https://commonroad.in.tum.de/tools/commonroad-reach)
-package omits in favor of a 4D point-mass model).
+bicycle kinematics
 
 ## Features
 
@@ -22,8 +18,7 @@ package omits in favor of a 4D point-mass model).
 
 ## Status
 
-v0.0.1 — minimum viable port for checking reachability of CommonRoad
-scenarios with goal orientation constraints. Skipped (vs full CORA):
+v0.0.1 = minimum port. Skipped:
 matrix zonotopes, adaptive step size, set splitting, hybrid systems,
 DAEs, dynamic single-track (ST) model with friction.
 
@@ -68,6 +63,6 @@ PYTHONPATH=src python -m pytest src/pycora/tests/ -v
 ## Reference
 
 M. Althoff, "Reachability analysis and its application to the safety
-assessment of autonomous cars", PhD dissertation, TU München, 2010.
+assessment of autonomous cars", PhD dissertation, TU Munchen, 2010.
 
 CORA toolbox: https://tumcps.github.io/CORA/

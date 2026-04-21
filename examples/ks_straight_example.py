@@ -1,7 +1,4 @@
 """End-to-end example: KS bicycle reach over 2 seconds on a straight road.
-
-Run from the repo root:
-    PYTHONPATH=src python src/pycora/examples/ks_straight_example.py
 """
 import numpy as np
 
@@ -18,12 +15,12 @@ def main():
     x0 = np.array([0.0, 0.0, 0.0, 10.0, 0.0])
     R0 = Zonotope.from_center_radii(x0, [0.2, 0.2, 0.02, 0.2, 0.05])
 
-    # Inputs: bounded steering rate ±0.4 rad/s, bounded accel ±2 m/s²
+    # Inputs: bounded steering rate +/-0.4 rad/s, bounded accel +/-2 m/s²
     U = Zonotope.from_center_radii([0.0, 0.0], [0.4, 2.0])
 
     print(f"Initial state center: {x0}")
     print(f"Initial uncertainty radii: {[0.2, 0.2, 0.02, 0.2, 0.05]}")
-    print(f"Input bounds: ±[0.4, 2.0] (steering rate, acceleration)")
+    print(f"Input bounds: +/-[0.4, 2.0] (steering rate, acceleration)")
     print()
 
     # Reach for 2 seconds (20 steps at dt=0.1)

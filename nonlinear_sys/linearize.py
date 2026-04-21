@@ -1,19 +1,15 @@
 """Linearization of nonlinear ODE around a reference point + Lagrange remainder.
 
-Faithful port of:
-  CORA/contDynamics/@nonlinearSys/linearize.m
-  CORA/global/functions/helper/sets/contSet/contSet/lin_error2dAB.m
+See  CORA/contDynamics/@nonlinearSys/linearize.m; CORA/global/functions/helper/sets/contSet/contSet/lin_error2dAB.m
 
-Uses JAX for analytical Jacobian and Hessian (matches CORA's symbolic-derivative
-fidelity; CORA pre-computes via MATLAB's symbolic toolbox).
+Uses JAX for analytical Jacobian and Hessian (CORA pre-computes via MATLAB's symbolic toolbox).
 """
 from __future__ import annotations
 
 import os
 from typing import Callable
 
-# Force CPU and silence "no CUDA jaxlib" warning — our problems are tiny
-# (5D state, microsecond ops); GPU launch overhead would dominate.
+# Force CPU
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
 
 import jax
@@ -22,16 +18,16 @@ import numpy as np
 
 from ..zonotope import Zonotope
 
-# Use 64-bit floats to match MATLAB's default precision
+# 64-bit floats to match MATLAB's default precision
 jax.config.update("jax_enable_x64", True)
 
 
 def linearize_at(
     f: Callable, x_star: np.ndarray, u_star: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Linearize ẋ = f(x, u) at (x*, u*) → (A, B, c) where ẋ ≈ A·(x-x*) + B·(u-u*) + c.
+    """Linearize x_dot = f(x, u) at (x*, u*) → (A, B, c) where x_dot ~ A*(x-x*) + B*(u-u*) + c.
 
-    A = ∂f/∂x|*, B = ∂f/∂u|*, c = f(x*, u*)
+    A = df/dx|*, B = df/du|*, c = f(x*, u*)
 
     Uses jax.jacfwd for analytical Jacobians (forward-mode AD).
     """
@@ -57,8 +53,8 @@ def lagrange_remainder(
 ) -> Zonotope:
     """Bound the linearization error as an additive disturbance set.
 
-    Implements lin_error2dAB.m approach: bound the quadratic form
-    ½ (z - z*)ᵀ ∂²f_i/∂z² (z - z*) for each output coordinate i,
+    Implements lin_error2dAB.m: bound the quadratic form
+    1/2 (z - z*).T d^2f_i/dz^2 (z - z*) for each output coordinate i,
     using Hessian evaluated on the interval R × U.
 
     Parameters
@@ -95,18 +91,17 @@ def lagrange_remainder(
     f_z_jit = jax.jit(f_z)
     H_fn = jax.jit(jax.hessian(f_z_jit))
 
-    # Conservative Hessian bound: evaluate at center, take absolute value.
     # CORA evaluates the Hessian on the *interval* (R × U) using interval
-    # arithmetic. As a conservative numerical proxy we evaluate at center;
+    # arithmetic. As a conservative numerical proxy we evaluate at center
     # then use the dz radii to bound the quadratic form. For tight bounds
-    # one should do interval arithmetic on the symbolic Hessian; for our
-    # small step sizes (dt = 0.1) the center-Hessian is generally adequate.
+    # one should do interval arithmetic on the symbolic Hessian but for our
+    # small step sizes (dt = 0.1) the center-Hessian is fine.
     z_center = np.concatenate([R.c, U.c])
     H = np.asarray(H_fn(jnp.asarray(z_center, dtype=jnp.float64)))
     # H has shape (n_x_out, n_z, n_z). Use absolute values for sound bound.
     H_abs = np.abs(H)
 
-    # For each output coordinate i, bound is ½ · dzᵀ · |H_i| · dz
+    # For each output coordinate i, bound is 1/2 * dz.T * |H_i| * dz
     n_out = H.shape[0]
     radii = np.zeros(n_out)
     for i in range(n_out):

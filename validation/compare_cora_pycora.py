@@ -1,4 +1,4 @@
-"""Compare CORA MATLAB and pycora reach outputs side by side.
+"""Compare CORA MATLAB and pycora reach outputs
 
 Reads ks_curve_reach_bounds.csv from validation/cora_outputs/ and
 validation/pycora_outputs/ and prints per-step bounds + relative error.

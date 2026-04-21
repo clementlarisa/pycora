@@ -1,18 +1,18 @@
-"""LinearSys — port of CORA's @linearSys.
+"""LinearSys port of CORA's @linearSys.
 
-Continuous-time linear time-invariant system: ẋ = A·x + B·u + c
+Continuous-time linear time-invariant system: x_dot = A*x + B*u + c
 (for our purposes ``c=0`` since the linearization point is encoded
 directly in the affine offset around the nominal trajectory).
 
 Reachability follows Althoff (2010), Chapter 3. We implement the basic
 ``oneStep`` propagation:
 
-  Htp = exp(A·dt) · X                       homogeneous time-point
-  Hti = enclose(X, Htp) ⊕ F·X               homogeneous time-interval
-  Pu  = ∫₀^dt exp(A·τ) dτ · u_const         constant input
-  PU  = ∫₀^dt exp(A·τ) · U_uncertain        time-varying input (zonotope U)
-  Rtp = Htp ⊕ Pu ⊕ PU                       full time-point
-  Rti = Hti ⊕ enclose(0, Pu) ⊕ G·U ⊕ PU     full time-interval
+  Htp = exp(A*dt) * X                       homogeneous time-point
+  Hti = enclose(X, Htp) \oplus F*X               homogeneous time-interval
+  Pu  = \int_{0}^dt exp(A*tau) dtau * u_const         constant input
+  PU  = \int_{0}^dt exp(A*tau) * U_uncertain        time-varying input (zonotope U)
+  Rtp = Htp \oplus Pu \oplus PU                       full time-point
+  Rti = Hti \oplus enclose(0, Pu) \oplus G*U \oplus PU     full time-interval
 
 where F, G are correction-matrix interval matrices (Prop. 3.1).
 
@@ -37,7 +37,7 @@ from ._taylor import (
 
 
 class LinearSys:
-    """Continuous-time linear system ẋ = A·x + B·u (+ optional constant).
+    """Continuous-time linear system x_dot = A*x + B*u (+ optional constant).
 
     Cached values per-time-step to mirror CORA's ``taylorLinSys`` lazy cache.
     """
@@ -66,7 +66,7 @@ class LinearSys:
     # Cached primitives
     # -------------------------------------------------------------------------
     def get_eAdt(self, dt: float, truncation_order: int = 6) -> np.ndarray:
-        """exp(A·dt) — exact via scipy.linalg.expm (matches CORA's getTaylor cache)."""
+        """exp(A*dt) exact via scipy.linalg.expm (matches CORA's getTaylor cache)."""
         key = (dt, truncation_order)
         if key not in self._eAdt_cache:
             # Use exact matrix exponential rather than truncated Taylor — CORA
@@ -107,15 +107,15 @@ class LinearSys:
         dt: float,
         truncation_order: int = 6,
     ) -> tuple[Zonotope, Zonotope]:
-        """Compute (Htp, Hti) — homogeneous time-point and time-interval reach.
+        """Compute (Htp, Hti) homogeneous time-point and time-interval reach.
 
-        Htp = exp(A·dt) · X
-        Hti = enclose(X, Htp) ⊕ F·X
+        Htp = exp(A*dt) * X
+        Hti = enclose(X, Htp) \oplus F*X
         """
         eAdt = self.get_eAdt(dt, truncation_order)
         Htp = X.linear_map(eAdt)
 
-        # Curvature error: F · X (interval matrix times zonotope)
+        # Curvature error: F * X (interval matrix times zonotope)
         F_min, F_max = self.get_F(dt, truncation_order)
         C_state = interval_matrix_times_zonotope(F_min, F_max, X)
 
@@ -131,10 +131,10 @@ class LinearSys:
         """Particular solution for a constant input.
 
         Returns (Pu_tp, C_input):
-          Pu_tp = M · (B · u_const)
-          C_input = G · (B · u_const)         (curvature error)
+          Pu_tp = M * (B * u_const)
+          C_input = G * (B * u_const)         (curvature error)
 
-        Then Pti = enclose(0, Pu_tp) ⊕ C_input  is left for the caller.
+        Then Pti = enclose(0, Pu_tp) \oplus C_input  is left for the caller.
         """
         # Convert input to zonotope if numeric
         if isinstance(u_const, Zonotope):
@@ -160,7 +160,7 @@ class LinearSys:
             Pu_tp = Pu_tp.plus(Zonotope.from_center_radii(
                 np.zeros(self.n), extra_radius))
 
-        # Curvature error for input: G · BU
+        # Curvature error for input: G * BU
         G_min, G_max = self.get_G(dt, truncation_order)
         C_input = interval_matrix_times_zonotope(G_min, G_max, BU)
 
