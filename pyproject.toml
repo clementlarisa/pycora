@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pycora"
+version = "0.0.1"
+description = "Minimal Python port of CORA reachability for autonomous-vehicle bicycle kinematics"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "jax>=0.4",
+    "jaxlib>=0.4",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+commonroad = ["commonroad-io>=2024.1", "commonroad-vehicle-models"]
+
+[tool.setuptools.packages.find]
+include = ["pycora*"]
