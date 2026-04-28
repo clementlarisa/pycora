@@ -1,8 +1,15 @@
 # pycora
 
-Python port of [CORA](https://tumcps.github.io/CORA/) (Continuous
+Python port of [CORA](https://tumcps.github.io/CORA/) (COntinuous
 Reachability Analyzer) focused on autonomous-vehicle reachability with
-bicycle kinematics
+bicycle kinematics. Work in progress — full port not yet complete.
+
+Unofficial; not affiliated with TU München or the CORA development team.
+The upstream MATLAB project lives at
+[TUMcps/CORA](https://github.com/TUMcps/CORA). Numerical agreement with
+CORA is checked in `validation/`.
+
+Licensed GPL-3.0, inherited from CORA. See `LICENSE`.
 
 ## Features
 
@@ -60,9 +67,24 @@ print(f"final orientation range: [{psi_lb[0]:.3f}, {psi_ub[0]:.3f}] rad")
 PYTHONPATH=src python -m pytest src/pycora/tests/ -v
 ```
 
-## Reference
+## Validation
 
-M. Althoff, "Reachability analysis and its application to the safety
-assessment of autonomous cars", PhD dissertation, TU Munchen, 2010.
+`validation/` runs the same KS reach problem in MATLAB CORA
+(`cora_ks_reach.m`) and pycora (`pycora_ks_reach.py`), with
+`compare_cora_pycora.py` checking numerical agreement.
 
-CORA toolbox: https://tumcps.github.io/CORA/
+## References
+
+- M. Althoff, "Reachability analysis and its application to the safety
+  assessment of autonomous cars," PhD dissertation, TU München, 2010.
+- M. Althoff, "An Introduction to CORA 2015," in *Proc. of the Workshop
+  on Applied Verification for Continuous and Hybrid Systems*, 2015.
+- CORA toolbox: <https://tumcps.github.io/CORA/> —
+  <https://github.com/TUMcps/CORA>
+
+For academic work, cite the original CORA papers and the Althoff
+dissertation.
+
+## License
+
+GPL-3.0, inherited from CORA. See `LICENSE`.
